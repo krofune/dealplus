@@ -39,7 +39,8 @@ input[type=search]{flex:1 1 220px;min-width:0}
 .count{font-size:13px;color:var(--muted);margin-left:auto}
 main{padding-top:16px;padding-bottom:48px}
 .list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.th,.row{display:grid;grid-template-columns:minmax(0,1.9fr) 104px 80px minmax(0,1.2fr) 88px minmax(220px,2fr);gap:12px;align-items:center;padding:0 18px}
+.th,.row{display:grid;grid-template-columns:44px minmax(0,1.9fr) 104px 80px minmax(0,1.2fr) 88px minmax(220px,2fr);gap:12px;align-items:center;padding:0 18px}
+.c-date{align-self:start;padding-top:3px;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .th{background:#EEF2F0;font-size:12.5px;font-weight:700;color:var(--sub);height:40px}
 .th .r,.row .r{text-align:right}
 .row{min-height:72px;padding-top:12px;padding-bottom:12px;border-top:1px solid var(--line)}
@@ -74,7 +75,8 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
 @media (max-width:860px){
   .th{display:none}
   .row{grid-template-columns:1fr auto;gap:4px 12px;padding:14px 16px}
-  .c-name{grid-column:1/2}.c-amt{grid-column:2/3;grid-row:1/2;align-self:start}
+  .c-date{grid-column:1/-1;padding-top:0}
+  .c-name{grid-column:1/2}.c-amt{grid-column:2/3;grid-row:2/3;align-self:start}
   .c-asset,.c-kind,.c-party{grid-column:1/-1}
   .c-asset{display:flex;gap:8px;align-items:center}.c-asset .chip{margin-top:0}
   .c-kind{display:none}
@@ -122,7 +124,7 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
   <div>
     <div class="brand"><span class="logo">+</span>상업용 부동산 Deal Plus</div>
     <h1>상업용 부동산 딜 데이터베이스</h1>
-    <div class="upd">최종 갱신 2026-11-01 09:33 (KST) · 공시·언론 보도 기반<span id="tg"></span></div>
+    <div class="upd">최종 갱신 2026-11-01 14:01 (KST) · 공시·언론 보도 기반<span id="tg"></span></div>
   </div>
   <div class="kpis">
     <div class="kpi"><span>전체 딜</span><b id="k-all">-</b></div>
@@ -147,7 +149,7 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
 
 <main class="wrap">
   <div class="list" id="list">
-    <div class="th"><div>자산 · 사업장</div><div>유형 · 위치</div><div>구분</div><div>주체</div><div class="r">금액</div><div>투자자 및 자금조달 관련 사항</div></div>
+    <div class="th"><div>날짜</div><div>자산 · 사업장</div><div>유형 · 위치</div><div>구분</div><div>주체</div><div class="r">금액</div><div>투자자 및 자금조달 관련 사항</div></div>
   </div>
   <button class="more" id="more" hidden>더 보기</button>
 </main>
@@ -202,12 +204,14 @@ function finHTML(f) {
 
 function rowHTML(r) {
   const date = r.date ? r.date.slice(2).replaceAll("-", ".") : "";
-  const meta = [r.review ? '<span class="rv">● 진행중</span>' : "", esc(date), esc(r.size)].filter(Boolean).join(" · ");
+  const md = r.date ? r.date.slice(5).replace("-", ".") : "";  // 왼쪽 날짜 칸 (MM.DD)
+  const meta = [r.review ? '<span class="rv">● 진행중</span>' : "", esc(r.size)].filter(Boolean).join(" · ");
   const name = r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)} ↗</a>` : esc(r.name);
   const tag = `<span class="tag ${r.cat === "실물" ? "t-real" : "t-dev"}">${r.cat}</span>`;
   const party = r.p.length ? r.p.map(x => `<div>${esc(x)}</div>`).join("") : '<div class="dash">-</div>';
   const det = r.detail.length ? `<details><summary>조건·메모</summary><ul>${r.detail.map(x => `<li>${esc(x)}</li>`).join("")}</ul></details>` : "";
   return `<div class="row">
+    <div class="c-date">${esc(md)}</div>
     <div class="c-name"><div class="nm">${tag}${name}</div><div class="meta">${meta}</div></div>
     <div class="c-asset"><span class="asset">${esc(r.asset)}</span>${r.region ? `<span class="chip">${esc(r.region)}</span>` : ""}</div>
     <div class="c-kind kind">${esc(r.kind)}</div>
