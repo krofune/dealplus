@@ -124,7 +124,7 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
   <div>
     <div class="brand"><span class="logo">+</span>상업용 부동산 Deal Plus</div>
     <h1>상업용 부동산 딜 데이터베이스</h1>
-    <div class="upd">최종 갱신 2026-11-01 14:01 (KST) · 공시·언론 보도 기반<span id="tg"></span></div>
+    <div class="upd">최종 갱신 2026-11-01 14:03 (KST) · 공시·언론 보도 기반<span id="tg"></span></div>
   </div>
   <div class="kpis">
     <div class="kpi"><span>전체 딜</span><b id="k-all">-</b></div>
@@ -149,7 +149,7 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
 
 <main class="wrap">
   <div class="list" id="list">
-    <div class="th"><div>날짜</div><div>자산 · 사업장</div><div>유형 · 위치</div><div>구분</div><div>주체</div><div class="r">금액</div><div>투자자 및 자금조달 관련 사항</div></div>
+    <div class="th"><div>날짜</div><div>자산 · 사업장</div><div>유형 · 위치</div><div>구분</div><div>주체</div><div>금액</div><div>투자자 및 자금조달 관련 사항</div></div>
   </div>
   <button class="more" id="more" hidden>더 보기</button>
 </main>
@@ -216,7 +216,7 @@ function rowHTML(r) {
     <div class="c-asset"><span class="asset">${esc(r.asset)}</span>${r.region ? `<span class="chip">${esc(r.region)}</span>` : ""}</div>
     <div class="c-kind kind">${esc(r.kind)}</div>
     <div class="c-party pt"><span class="kind" style="display:none"></span>${party}</div>
-    <div class="c-amt r amt ${r.amt === "미공개" ? "na" : ""}">${esc(r.amt)}</div>
+    <div class="c-amt amt ${r.amt === "미공개" ? "na" : ""}">${esc(r.amt)}</div>
     <div class="c-met">${finHTML(r.fin)}</div>
     ${det}</div>`;
 }
