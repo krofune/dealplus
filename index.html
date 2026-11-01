@@ -132,7 +132,7 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
   <div>
     <div class="brand"><span class="logo">+</span>상업용 부동산 Deal Plus</div>
     <h1>상업용 부동산 딜 데이터베이스</h1>
-    <div class="upd">최종 갱신 2026-11-01 15:13 (KST) · 공시·언론 보도 기반<span id="tg"></span></div>
+    <div class="upd">최종 갱신 2026-11-01 15:15 (KST) · 공시·언론 보도 기반<span id="tg"></span></div>
   </div>
   <div class="kpis">
     <div class="kpi"><span>전체 딜</span><b id="k-all">-</b></div>
@@ -154,7 +154,6 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
   <select id="f-sort" aria-label="정렬"><option value="date">최신순</option><option value="amt">금액순</option></select>
   <input type="search" id="f-q" placeholder="자산명·차주·대주·매수자 검색">
   <select id="f-per" aria-label="페이지당 건수"><option value="10" selected>10개씩 보기</option><option value="20">20개씩 보기</option><option value="50">50개씩 보기</option></select>
-  <span class="count" id="count"></span>
 </div></div>
 
 <main class="wrap">
@@ -239,7 +238,6 @@ function render() {
   const per = +$("#f-per").value, last = Math.max(1, Math.ceil(rows.length / per));
   state.page = Math.min(Math.max(1, state.page), last);
   list.insertAdjacentHTML("beforeend", rows.slice((state.page - 1) * per, state.page * per).map(rowHTML).join(""));
-  $("#count").textContent = `${rows.length.toLocaleString()}건`;
   renderPager(last, rows.length);
 }
 
