@@ -132,7 +132,7 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
   <div>
     <div class="brand"><span class="logo">+</span>상업용 부동산 Deal Plus</div>
     <h1>상업용 부동산 딜 데이터베이스</h1>
-    <div class="upd">최종 갱신 2026-11-01 15:24 (KST) · 공시·언론 보도 기반<span id="tg"></span></div>
+    <div class="upd">최종 갱신 2026-11-01 15:27 (KST) · 공시·언론 보도 기반<span id="tg"></span></div>
   </div>
   <div class="kpis">
     <div class="kpi"><span>전체 딜</span><b id="k-all">-</b></div>
@@ -150,7 +150,7 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
   <select id="f-asset" aria-label="자산유형"><option value="">모든 유형</option></select>
   <select id="f-region" aria-label="권역"><option value="">모든 권역</option></select>
   <select id="f-kind" aria-label="구분"><option value="">모든 구분</option><optgroup label="매각 단계"><option>자문사 선정</option><option>매각추진</option><option>입찰예정</option><option>우협선정</option><option>매각예정</option><option>매각완료</option><option>매각철회</option></optgroup><optgroup label="개발 금융"><option>브릿지론</option><option>본PF</option></optgroup></select>
-  <select id="f-days" aria-label="기간"><option value="7">최근 7일</option><option value="30" selected>최근 30일</option><option value="90">최근 90일</option><option value="0">전체 기간</option></select>
+  <select id="f-days" aria-label="기간"><option value="7">최근 7일</option><option value="30">최근 30일</option><option value="90">최근 90일</option><option value="0" selected>전체 기간</option></select>
   <select id="f-sort" aria-label="정렬"><option value="date">최신순</option><option value="amt">금액순</option></select>
   <input type="search" id="f-q" placeholder="자산명·차주·대주·매수자 검색">
   <select id="f-per" aria-label="페이지당 건수"><option value="10" selected>10개씩 보기</option><option value="20">20개씩 보기</option><option value="50">50개씩 보기</option></select>
@@ -194,9 +194,10 @@ function fillSelect(sel, key) {
 fillSelect($("#f-asset"), "asset");
 fillSelect($("#f-region"), "region");
 
-function filtered() {
+function filtered(skip) {  // skip: 건수 계산 시 제외할 필터 (자기 자신)
   const q = $("#f-q").value.trim().toLowerCase();
-  const grp = $("#f-grp").value, asset = $("#f-asset").value, region = $("#f-region").value, kind = $("#f-kind").value;
+  let grp = $("#f-grp").value, asset = $("#f-asset").value, region = $("#f-region").value, kind = $("#f-kind").value;
+  if (skip === "asset") asset = ""; if (skip === "region") region = ""; if (skip === "kind") { kind = ""; grp = ""; }
   const days = +$("#f-days").value, sort = $("#f-sort").value;
   let rows = DATA.filter(r =>
     (!state.cat || r.cat === state.cat) && (!grp || r.grp === grp) && (!asset || r.asset === asset) &&
@@ -231,6 +232,7 @@ function rowHTML(r) {
 }
 
 function render() {
+  refreshCounts();
   const rows = filtered();
   const list = $("#list");
   list.querySelectorAll(".row,.empty").forEach(n => n.remove());
@@ -239,6 +241,20 @@ function render() {
   state.page = Math.min(Math.max(1, state.page), last);
   list.insertAdjacentHTML("beforeend", rows.slice((state.page - 1) * per, state.page * per).map(rowHTML).join(""));
   renderPager(last, rows.length);
+}
+
+// 유형·권역·구분 목록의 (건수)를 현재 다른 필터 조건 기준으로 다시 계산, 0건은 선택 불가
+function refreshCounts() {
+  [["#f-asset", "asset"], ["#f-region", "region"], ["#f-kind", "kind"]].forEach(([id, key]) => {
+    const c = {}; filtered(key).forEach(r => { if (r[key]) c[r[key]] = (c[r[key]] || 0) + 1; });
+    $(id).querySelectorAll("option").forEach(o => {
+      if (!o.value) return;
+      if (!o.dataset.l) { o.dataset.l = o.value; o.value = o.value; }  // 표시 문구를 바꿔도 값은 유지
+      const n = c[o.value] || 0;
+      o.textContent = `${o.dataset.l} (${n})`;
+      o.disabled = n === 0 && !o.selected;
+    });
+  });
 }
 
 // 페이지 번호: 현재 페이지 주변 5개 + 처음·끝, ‹ › 이동
