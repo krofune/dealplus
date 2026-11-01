@@ -127,7 +127,7 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
   <div>
     <div class="brand"><span class="logo">+</span>상업용 부동산 Deal Plus</div>
     <h1>상업용 부동산 딜 데이터베이스</h1>
-    <div class="upd">최종 갱신 2026-11-01 14:56 (KST) · 공시·언론 보도 기반<span id="tg"></span></div>
+    <div class="upd">최종 갱신 2026-11-01 14:58 (KST) · 공시·언론 보도 기반<span id="tg"></span></div>
   </div>
   <div class="kpis">
     <div class="kpi"><span>전체 딜</span><b id="k-all">-</b></div>
@@ -144,8 +144,7 @@ footer{color:var(--muted);font-size:12.5px;padding-bottom:40px}
   <select id="f-grp" aria-label="조달·매매"><option value="">조달+매매</option><option>조달</option><option>매매</option></select>
   <select id="f-asset" aria-label="자산유형"><option value="">모든 유형</option></select>
   <select id="f-region" aria-label="권역"><option value="">모든 권역</option></select>
-  <select id="f-kind" aria-label="개발 금융"><option value="">개발 금융</option><option>브릿지론</option><option>본PF</option></select>
-  <select id="f-stage" aria-label="매각 단계"><option value="">매각 단계</option><option>자문사 선정</option><option>매각추진</option><option>입찰예정</option><option>우협선정</option><option>매각예정</option><option>매각완료</option><option>매각철회</option></select>
+  <select id="f-kind" aria-label="구분"><option value="">모든 구분</option><optgroup label="개발 금융"><option>브릿지론</option><option>본PF</option></optgroup><optgroup label="매각 단계"><option>자문사 선정</option><option>매각추진</option><option>입찰예정</option><option>우협선정</option><option>매각예정</option><option>매각완료</option><option>매각철회</option></optgroup></select>
   <select id="f-days" aria-label="기간"><option value="7">최근 7일</option><option value="30" selected>최근 30일</option><option value="90">최근 90일</option><option value="0">전체 기간</option></select>
   <select id="f-sort" aria-label="정렬"><option value="date">최신순</option><option value="amt">금액순</option></select>
   <input type="search" id="f-q" placeholder="자산명·차주·대주·매수자 검색">
@@ -192,11 +191,11 @@ fillSelect($("#f-region"), "region");
 
 function filtered() {
   const q = $("#f-q").value.trim().toLowerCase();
-  const grp = $("#f-grp").value, asset = $("#f-asset").value, region = $("#f-region").value, kind = $("#f-kind").value, stage = $("#f-stage").value;
+  const grp = $("#f-grp").value, asset = $("#f-asset").value, region = $("#f-region").value, kind = $("#f-kind").value;
   const days = +$("#f-days").value, sort = $("#f-sort").value;
   let rows = DATA.filter(r =>
     (!state.cat || r.cat === state.cat) && (!grp || r.grp === grp) && (!asset || r.asset === asset) &&
-    (!region || r.region === region) && (!kind || r.kind === kind) && (!stage || r.kind === stage) && (!days || daysAgo(r.date) < days) &&
+    (!region || r.region === region) && (!kind || r.kind === kind) && (!days || daysAgo(r.date) < days) &&
     (!q || [r.name, ...r.p, ...r.detail, r.region, r.asset].join(" ").toLowerCase().includes(q)));
   rows.sort(sort === "amt" ? (a, b) => b.eok - a.eok : (a, b) => (b.date > a.date) - (b.date < a.date) || b.eok - a.eok);
   return rows;
@@ -249,11 +248,17 @@ document.querySelectorAll("#seg-cat button").forEach(b => b.addEventListener("cl
   state.cat = b.dataset.v; state.shown = 60; render();
 }));
 // 브릿지론·본PF는 조달 딜이므로, 매매가 선택돼 있으면 자동으로 조달로 전환
-// 매각 단계는 매매 딜이므로 조달이 선택돼 있으면 매매로 전환 (개발 금융 필터와 동시 선택 불가)
-$("#f-kind").addEventListener("change", () => { if ($("#f-kind").value) { $("#f-stage").value = ""; if ($("#f-grp").value === "매매") $("#f-grp").value = "조달"; } });
-$("#f-stage").addEventListener("change", () => { if ($("#f-stage").value) { $("#f-kind").value = ""; if ($("#f-grp").value === "조달") $("#f-grp").value = "매매"; } });
-$("#f-grp").addEventListener("change", () => { const g = $("#f-grp").value; if (g === "매매") $("#f-kind").value = ""; if (g === "조달") $("#f-stage").value = ""; });
-["#f-grp", "#f-asset", "#f-region", "#f-kind", "#f-stage", "#f-days", "#f-sort"].forEach(s => $(s).addEventListener("change", () => { state.shown = 60; render(); }));
+// 구분: 개발 금융(브릿지론·본PF)은 조달, 매각 단계는 매매 — 선택하면 조달·매매 필터를 맞춰 줌
+const FIN_KINDS = ["브릿지론", "본PF"];
+$("#f-kind").addEventListener("change", () => {
+  const k = $("#f-kind").value; if (!k) return;
+  $("#f-grp").value = FIN_KINDS.includes(k) ? "조달" : "매매";
+});
+$("#f-grp").addEventListener("change", () => {
+  const g = $("#f-grp").value, k = $("#f-kind").value;
+  if (k && g && (FIN_KINDS.includes(k) ? "조달" : "매매") !== g) $("#f-kind").value = "";
+});
+["#f-grp", "#f-asset", "#f-region", "#f-kind", "#f-days", "#f-sort"].forEach(s => $(s).addEventListener("change", () => { state.shown = 60; render(); }));
 $("#f-q").addEventListener("input", () => { state.shown = 60; render(); });
 $("#more").addEventListener("click", () => { state.shown += 60; render(); });
 
